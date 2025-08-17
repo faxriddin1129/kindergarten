@@ -10,6 +10,7 @@ $maxCount = 0;
 
 function check($answer, $question):int
 {
+    $answer = $answer['answer'];
     $res = 0;
     if ($question['type'] == 'Close'){
         if ($answer == $question['answer_1']){
@@ -27,14 +28,12 @@ function check($answer, $question):int
 $responses = [];
 foreach ($answers as $key => $answer) {
     $data = json_decode($answer['answers'],1);
-
     if ($maxCount < count($data)){
         $maxCount = count($data);
     }
-
     $padRes = [];
     foreach ($data as $key2 => $d) {
-        $res = check($d, $questions[$key2]);
+        $res = check($d, $questions[$d['id']]);
         $padRes[] = $res;
     }
     $responses[] = $padRes;
@@ -42,9 +41,14 @@ foreach ($answers as $key => $answer) {
 
 $allData = [];
 foreach ($responses as $key => $response) {
+    $u = $answers[$key];
+    unset($u['answers']);
+    unset($u['created_at']);
+    unset($u['rash_control_id']);
+    unset($u['chat_id']);
     $allData[] = [
         'res' => $response,
-        'user' => $answers[$key],
+        'user' => $u,
         'ball' => 0,
         'degree' => 0,
     ];
@@ -61,7 +65,7 @@ foreach ($responses as $key => $response) {
                     <tr>
                         <th>Full Name</th>
                         <?php for ($i = 0; $i<$maxCount; $i++): ?>
-                            <th><?=($i+1)?></th>
+                            <th>Q<?=($i+1)?></th>
                         <?php endfor; ?>
                         <th>Ball</th>
                         <th>Daraja</th>

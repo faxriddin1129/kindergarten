@@ -50,8 +50,10 @@ class RashController extends Controller
             return $this->redirect(['/rash/main?error=Bunday ID lik test topilmadi!']);
         }
 
-        $questions = RashQuiz::find()->select(['id', 'rash_control_id', 'type', 'number'])->asArray()->andWhere(['rash_control_id' => $model->id])->orderBy(['number' => SORT_ASC])->all();
-
+        $questions = RashQuiz::find()->select(['id', 'rash_control_id', 'type', 'number', 'format'])->asArray()->andWhere(['rash_control_id' => $model->id])->orderBy(['number' => SORT_ASC])->all();
+        usort($questions, function ($a, $b) {
+            return strnatcmp($a['number'], $b['number']);
+        });
         return $this->render('check', [
             'model' => $model,
             'questions' => $questions,
@@ -66,7 +68,7 @@ class RashController extends Controller
         $decoded = json_decode($raw, true);
 
         $check = RashAnswer::find()
-            ->andWhere(['rash_control_id' => $decoded['rash_id']])
+            ->andWhere(['rash_control_id' => $decoded['quiz_id']])
             ->andWhere(['chat_id' => $decoded['chat_id']])
             ->one();
         if ($check){
@@ -78,7 +80,7 @@ class RashController extends Controller
         }
 
         $model = new RashAnswer();
-        $model->rash_control_id = $decoded['rash_id'];
+        $model->rash_control_id = $decoded['quiz_id'];
         $model->chat_id = $decoded['chat_id'];
         $model->full_name = $decoded['full_name'];
         $model->answers = json_encode($decoded['answers']);
@@ -136,6 +138,11 @@ class RashController extends Controller
     public function actionRash($id)
     {
         dd($id);
+    }
+
+    public function actionSuccess()
+    {
+        return $this->render('success');
     }
 
 }

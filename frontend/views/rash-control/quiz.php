@@ -21,7 +21,7 @@ $this->title = 'Quiz';
                 <div class="row">
                     <h3>Yaratish</h3>
                     <div class="col-md-3">
-                        <?=$form->field($model,'type')->dropDownList(['Open' => 'Open', 'Close' => 'Close'])?>
+                        <?=$form->field($model,'type')->dropDownList(['Close' => 'Close', 'Open' => 'Open'])?>
                     </div>
                     <div class="col-md-3"><?=$form->field($model,'number')?></div>
 
@@ -29,7 +29,14 @@ $this->title = 'Quiz';
 
                     <div class="col-md-3"><div class="form-group field-rashquiz-answer_1 required">
                             <label class="control-label" for="rashquiz-answer_1">Answer 1</label>
-                            <math-field v-on:input="updateField('latex1', $event)" style="width: 100%; font-size: 1.2em;"></math-field>
+
+                            <math-field
+                                    virtual-keyboard-mode="onfocus"
+                                    virtual-keyboard-theme="material"
+                                    virtual-keyboard-layout="numeric"
+                                    v-on:input="updateField('latex1', $event)" style="width: 100%; font-size: 1.2em;">
+                            </math-field>
+
                             <input v-model="latex1" required type="hidden" id="rashquiz-answer_1" class="form-control" name="RashQuiz[answer_1]" aria-required="true">
                         </div>
                     </div>
@@ -63,6 +70,15 @@ $this->title = 'Quiz';
                         </div>
                     </div>
 
+                    <div class="col-md-3"><div class="form-group field-rashquiz-answer_5">
+                            <label class="control-label" for="rashquiz-format">Format</label>
+                            <select class="form-select form-select-sm" id="rashquiz-format" name="RashQuiz[format]">
+                                <option value="A,B,C,D">A,B,C,D</option>
+                                <option value="A,B,C,D,E,F">A,B,C,D,E,F</option>
+                            </select>
+                        </div>
+                    </div>
+
 
 
 
@@ -90,19 +106,21 @@ $this->title = 'Quiz';
                         <th>Answer 3</th>
                         <th>Answer 4</th>
                         <th>Answer 5</th>
+                        <th>Format</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($data as $datum): ?>
                         <tr>
-                            <td><?=$datum['number']?></td>
+                            <td data-sort="<?=$datum['id']?>"><?=$datum['number']?></td>
                             <td><?=$datum['type']?></td>
                             <td><math-field read-only> <?=$datum['answer_1']?> </math-field></td>
                             <td><math-field read-only> <?=$datum['answer_2']?> </math-field></td>
                             <td><math-field read-only> <?=$datum['answer_3']?> </math-field></td>
                             <td><math-field read-only> <?=$datum['answer_4']?> </math-field></td>
                             <td><math-field read-only> <?=$datum['answer_5']?> </math-field></td>
+                            <td><?=$datum['format']?></td>
                             <td><a href="/rash-control/quiz-delete?id=<?=$id?>&quiz_id=<?=$datum['id']?>">Delete</a></td>
                         </tr>
                     <?php endforeach; ?>

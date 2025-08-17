@@ -153,6 +153,7 @@ $this->title = 'Test Privacy';
 <script>
     const TG = window.Telegram.WebApp;
     let USER_ID = TG.initDataUnsafe.user.id
+    // let USER_ID = 7579528513
     TG.expand()
 
     window.addEventListener('DOMContentLoaded', () => {

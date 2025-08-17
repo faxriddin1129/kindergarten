@@ -1,548 +1,293 @@
 <?php
 
-/* @var $questions */
-/* @var $full_name */
-/* @var $model \frontend\models\rash\RashControl */
-
-$this->title = 'Answers';
-
+/** @var $model */
+/** @var $full_name */
+/** @var $questions */
 
 $dataQuestions = [];
 
 foreach ($questions as $question) {
-    $type = 'multiple_choice';
-    $category = 'Geography';
+    $type = 'choice';
+    $options = explode(",", $question['format']);
     if ($question['type'] == 'Open'){
         $type = 'input';
-        $category = 'Mathematics';
+        $options = [];
     }
     $dataQuestions[] = [
         'id' => $question['id'],
         'number' => $question['number'],
         'type' => $type,
-        'question' => '--',
-        'options' => ['A','B','C','D'],
-        'correctAnswer' => 'A',
-        'category' => $category,
+        'options' => $options,
     ];
 }
+
 ?>
-
-
-<!-- Bootstrap 5 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- Vue.js CDN -->
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-<!-- MathLive kutubxonasi -->
-<script type="module" src="https://unpkg.com/mathlive?module"></script>
-<style>
-    .bg{
-        background-color: #764ba2;;
-    }
-    body {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        min-height: 100vh;
-        padding: 20px 0;
-    }
-
-    input{
-        font-size: 18px!important;
-    }
-
-    .quiz-container {
-        max-width: 100%;
-        margin: 0 auto;
-    }
-
-    .progress {
-        height: 6px;
-        margin-bottom: 20px;
-    }
-
-    .option-letter {
-        font-weight: bold;
-        margin-right: 10px;
-        min-width: 25px;
-    }
-
-    /* MathLive math-field styling */
-    math-field {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #dee2e6;
-        border-radius: 5px;
-        font-size: 16px;
-        margin-bottom: 10px;
-        background-color: white;
-        min-height: 50px;
-    }
-
-    math-field:focus-within {
-        border-color: #764ba2;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        outline: none;
-    }
-
-    .question-type {
-        font-size: 0.8rem;
-    }
-
-    .option-card {
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .option-card:hover {
-        background-color: #f8f9fa;
-    }
-
-    .option-card.selected {
-        background-color: #764ba2;
-        color: white;
-        border-color: #764ba2;
-    }
-
-    .math-input-hint {
-        font-size: 0.8rem;
-        color: #6c757d;
-        font-style: italic;
-        margin-top: 5px;
-    }
-
-    .question-navigation {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
-        margin-bottom: 20px;
-    }
-
-    .question-nav-button {
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        font-size: 14px;
-        cursor: pointer;
-        background-color: #f0f0f0;
-        border: 1px solid #ddd;
-    }
-
-    .question-nav-button.active {
-        background-color: #673b91;
-        color: white;
-        border-color: #764ba2;
-    }
-
-    .question-nav-button.answered {
-        background-color: #764ba2;
-        color: white;
-        border-color: #764ba2;
-    }
-
-    .submit-section {
-        margin-top: 30px;
-        text-align: center;
-    }
-
-    .unanswered-warning {
-        color: #dc3545;
-        font-size: 14px;
-        margin-top: 10px;
-    }
-</style>
-
-<div id="app">
-    <div class="container py-4">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow-sm quiz-container">
-                    <div class="card-header bg text-white text-center py-3">
-                        <h3 class="mb-0">ID: <?=$model->quiz_id?></h3>
-                    </div>
-
-                    <div class="card-body p-4">
-                        <!-- Progress bar -->
-                        <div class="progress">
-                            <div class="progress-bar bg-success" role="progressbar"
-                                 :style="{ width: progress + '%' }"
-                                 :aria-valuenow="progress"
-                                 aria-valuemin="0"
-                                 aria-valuemax="100">
-                            </div>
-                        </div>
-
-                        <!-- Quiz content -->
-                        <div v-if="!quizCompleted && !isSubmitting">
-                            <div class="d-flex justify-content-between mb-3">
-                                <span class="badge bg-secondary">Savol {{ currentQuestionIndex + 1 }}/{{ questions.length }}</span>
-                                <span class="badge" :class="hasAnswer(currentQuestionIndex) ? 'bg-success' : 'bg-warning'">
-                                    {{ hasAnswer(currentQuestionIndex) ? 'Javob berilgan' : 'Javob berilmagan' }}
-                                </span>
-                            </div>
-
-                            <!-- Savollar navigatsiyasi -->
-                            <div class="question-navigation">
-                                <div v-for="(question, index) in questions"
-                                     :key="index"
-                                     class="question-nav-button"
-                                     :class="{
-                                        'active': currentQuestionIndex === index,
-                                        'answered': hasAnswer(index)
-                                     }"
-                                     @click="goToQuestion(index)">
-                                    {{ index + 1 }}
-                                </div>
-                            </div>
-
-                            <span class="badge bg-light text-dark question-type mb-2">
-                                {{ currentQuestion.type === 'multiple_choice' ? (currentQuestion.number + ' - Yopiq test') : (currentQuestion.number + ' - Ochiq test') }}
-                            </span>
-
-                            <!-- Yopiq test (multiple choice) -->
-                            <div v-if="currentQuestion.type === 'multiple_choice'" class="mb-4">
-                                <div v-for="(option, index) in currentQuestion.options"
-                                     :key="index"
-                                     class="card mb-2 option-card"
-                                     :class="{ selected: userAnswers[currentQuestionIndex] === option }"
-                                     @click="selectOption(option)">
-                                    <div class="card-body py-2 px-3">
-                                        <div class="d-flex align-items-center">
-                                            <span>{{ option }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Ochiq test (input) -->
-                            <div v-else class="mb-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <!-- MathLive math-field elementi -->
-                                        <math-field
-                                                :id="'math-input-' + currentQuestionIndex"
-                                                @input="updateMathInput"
-                                                virtual-keyboard-mode="onfocus"
-                                                virtual-keyboard-theme="material"
-                                                class="mb-2">
-                                        </math-field>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-between mt-4">
-                                <button class="btn btn-outline-success"
-                                        @click="prevQuestion"
-                                        :disabled="currentQuestionIndex === 0">
-                                    <i class="bi bi-arrow-left"></i> Oldingi
-                                </button>
-                                <button v-if="currentQuestionIndex < questions.length - 1"
-                                        class="btn btn-success"
-                                        @click="nextQuestion">
-                                    Keyingi <i class="bi bi-arrow-right"></i>
-                                </button>
-                                <button v-else
-                                        class="btn btn-success"
-                                        @click="showSubmitConfirmation">
-                                    Yuborish <i class="bi bi-check-lg"></i>
-                                </button>
-                            </div>
-
-                            <!-- Submit confirmation -->
-                            <div v-if="showingSubmitConfirmation" class="submit-section">
-                                <div class="alert" :class="unansweredCount > 0 ? 'alert-warning' : 'alert-info'">
-                                    <h5>Javoblarni yuborishni tasdiqlang</h5>
-                                    <p v-if="unansweredCount > 0" class="unanswered-warning">
-                                        Diqqat! {{ unansweredCount }} ta savolga javob berilmagan.
-                                    </p>
-                                    <p v-else>
-                                        Barcha savollarga javob berilgan.
-                                    </p>
-                                    <div class="d-flex justify-content-center gap-2 mt-3">
-                                        <button class="btn btn-secondary" @click="showingSubmitConfirmation = false">
-                                            Bekor qilish
-                                        </button>
-                                        <button class="btn btn-success" @click="submitQuiz">
-                                            Tasdiqlash va yuborish
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Loading state -->
-                        <div v-else-if="isSubmitting" class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Yuklanmoqda...</span>
-                            </div>
-                            <p class="mt-3">Javoblar yuborilmoqda...</p>
-                        </div>
-
-                        <!-- Results -->
-                        <div v-else class="text-center py-3">
-                            <div v-if="submitSuccess" class="alert alert-success mb-4">
-                                Javoblaringiz muvaffaqiyatli yuborildi!
-                            </div>
-                            <div v-if="submitError" class="alert alert-danger mb-4">
-                                Xatolik yuz berdi: {{ submitError }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Bootstrap 5 JS Bundle with Popper -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Telegram WebApp -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-
-<script>
-    const DATA_QUESTIONS = JSON.parse(('<?=json_encode($dataQuestions)?>'));
+<!-- Vue.js CDN -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<!-- MathLive CDN -->
+<script type="module">
+    import 'https://unpkg.com/mathlive?module';
 </script>
-<script>
-    const { createApp, ref, computed, nextTick, onMounted, watch } = Vue;
 
+<style>
+    body {
+        font-family: sans-serif;
+        background-color: white;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+    }
+
+    #app {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        width: 100%;
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+    }
+
+    .question-card {
+        padding: 10px;
+    }
+
+    .question-card h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #1a202c;
+    }
+
+    .options-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .option-button {
+        padding: 13px 25px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        font-weight: 500;
+        border: 1px solid #cbd5e0;
+        background-color: white;
+        color: #4a5568;
+    }
+
+    .option-button:hover {
+        background-color: #edf2f7;
+    }
+
+    .option-button.selected {
+        background-color: #764ba2; /* Button rangi */
+        color: white;
+        border-color: #764ba2;
+    }
+
+    .option-button.selected:hover {
+        background-color: #6a4291;
+    }
+
+    .math-input {
+        width: 100%;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        padding: 10px;
+        font-size: 1rem;
+        color: #4a5568;
+        box-sizing: border-box; /* Ensure padding doesn't increase width */
+    }
+
+    .math-input:focus {
+        outline: none;
+        border-color: #764ba2;
+        box-shadow: 0 0 0 2px rgba(118, 75, 162, 0.2);
+    }
+
+    .loading-message {
+        color: #718096;
+        font-size: 0.875rem;
+        margin-top: 8px;
+    }
+
+    .submit-button-container {
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    .submit-button {
+        background-color: #764ba2; /* Button rangi */
+        color: white;
+        padding: 12px 32px;
+        border-radius: 6px;
+        font-size: 1.125rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: background-color 0.2s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .submit-button:hover {
+        background-color: #6a4291;
+    }
+</style>
+
+
+<div id="app">
+    <h6>Test Javoblari Paneli</h6>
+
+    <div v-for="question in questions" :key="question.id" class="question-card">
+        <h6>Savol {{ question.number }}</h6>
+        <div v-if="question.type === 'choice'" class="options-container">
+            <button
+                    v-for="option in question.options"
+                    :key="option"
+                    @click="handleChoiceSelect(question.id, option, 'choice')"
+                    :class="['option-button', { 'selected': answers[question.id] && answers[question.id].answer === option }]"
+            >
+                {{ option }}
+            </button>
+        </div>
+        <div v-else-if="question.type === 'input'">
+            <div v-if="mathLiveLoaded">
+                <math-field
+                        :id="'math-input-' + question.id"
+                        virtual-keyboard-mode="onfocus"
+                        virtual-keyboard-theme="material"
+                        class="math-input"
+                        @input="event => handleMathInputChange(question.id, event)"
+                        :value="answers[question.id] ? answers[question.id].answer : ''"
+                ></math-field>
+            </div>
+            <div v-else class="loading-message">Matematik klaviatura yuklanmoqda...</div>
+        </div>
+    </div>
+
+    <div class="submit-button-container">
+        <button @click="handleSubmit" class="submit-button" id="sendButton">YUBORISH</button>
+    </div>
+</div>
+
+<script>
+    const {createApp, ref, onMounted} = Vue
 
     const TG = window.Telegram.WebApp;
-    TG.expand()
     let USER_ID = TG.initDataUnsafe.user.id
-
+    // let USER_ID = 7579528513
+    TG.expand()
 
     createApp({
         setup() {
-            // Quiz savollari
-            const questions = ref(DATA_QUESTIONS);
+            const questions = ref(<?=json_encode($dataQuestions)?>)
 
-            // Quiz holati
-            const currentQuestionIndex = ref(0);
-            const userAnswers = ref(Array(questions.value.length).fill(''));
-            const quizCompleted = ref(false);
-            const score = ref(0);
-            const isSubmitting = ref(false);
-            const submitSuccess = ref(false);
-            const submitError = ref('');
-            const showingSubmitConfirmation = ref(false);
+            const full_name = '<?=$full_name?>'
+            const chat_id = USER_ID
+            const quiz_id = '<?=$model["id"]?>'
 
-            // Joriy savol
-            const currentQuestion = computed(() => {
-                return questions.value[currentQuestionIndex.value];
-            });
+            const answers = ref({})
+            questions.value.forEach(q => {
+                if (q.type === 'input') {
+                    answers.value[q.id] = {answer: '', type: 'input'}
+                }
+            })
 
-            // Progress
-            const progress = computed(() => {
-                return ((currentQuestionIndex.value + 1) / questions.value.length) * 100;
-            });
+            const mathLiveLoaded = ref(false)
 
-            // Javob berilmagan savollar soni
-            const unansweredCount = computed(() => {
-                return userAnswers.value.filter(answer =>
-                    answer === null || answer === undefined || answer === ''
-                ).length;
-            });
-
-            // Savolga javob berilganmi tekshirish
-            function hasAnswer(index) {
-                const answer = userAnswers.value[index];
-                return answer !== null && answer !== undefined && answer !== '';
-            }
-
-            // Savolga o'tish
-            function goToQuestion(index) {
-                currentQuestionIndex.value = index;
-                nextTick(() => {
-                    initMathField();
-                });
-            }
-
-            // MathLive math-field ni yangilash
             onMounted(() => {
-                nextTick(() => {
-                    initMathField();
-                });
-            });
-
-            // currentQuestionIndex o'zgarganda MathField ni yangilash
-            watch(currentQuestionIndex, () => {
-                nextTick(() => {
-                    initMathField();
-                });
-            });
-
-            // MathLive math-field ni ishga tushirish
-            function initMathField() {
-                if (currentQuestion.value.type === 'input') {
-                    const mathFieldElement = document.getElementById(`math-input-${currentQuestionIndex.value}`);
-                    if (mathFieldElement) {
-                        // Agar avval kiritilgan qiymat bo'lsa, uni ko'rsatish
-                        const savedValue = userAnswers.value[currentQuestionIndex.value];
-                        if (savedValue) {
-                            mathFieldElement.value = savedValue;
-                        } else {
-                            mathFieldElement.value = ''; // Clear the field if no saved value
-                        }
-
-                        // Avtomatik fokus
-                        setTimeout(() => {
-                            mathFieldElement.focus();
-                        }, 300);
+                // MathLive script is already loaded via CDN in the head,
+                // so we just need to confirm it's available.
+                // A small delay might be needed to ensure the custom element is registered.
+                setTimeout(() => {
+                    if (window.MathfieldElement) { // Check if MathfieldElement is globally available
+                        mathLiveLoaded.value = true
+                        console.log("MathLive is ready.")
+                    } else {
+                        console.error("MathLive not found after timeout.")
                     }
+                }, 1000); // Give it a moment to load
+            })
+
+            const handleChoiceSelect = (questionId, selectedOption, type) => {
+                answers.value = {
+                    ...answers.value,
+                    [questionId]: {answer: selectedOption, type},
                 }
             }
 
-            // MathLive math-field qiymatini yangilash
-            function updateMathInput(event) {
-                const value = event.target.value;
-                userAnswers.value[currentQuestionIndex.value] = value;
-                console.log(`Saved answer for question ${currentQuestionIndex.value + 1}: ${value}`);
-            }
-
-            // Variantni tanlash (yopiq test uchun)
-            function selectOption(option) {
-                userAnswers.value[currentQuestionIndex.value] = option;
-            }
-
-            // Oldingi savolga o'tish
-            function prevQuestion() {
-                if (currentQuestionIndex.value > 0) {
-                    currentQuestionIndex.value--;
+            const handleMathInputChange = (questionId, event) => {
+                // MathLive's custom element has a 'value' property
+                const target = event.target
+                answers.value = {
+                    ...answers.value,
+                    [questionId]: {answer: target.value, type: 'input'},
                 }
             }
 
-            // Keyingi savolga o'tish
-            function nextQuestion() {
-                if (currentQuestionIndex.value < questions.value.length - 1) {
-                    currentQuestionIndex.value++;
+            const handleSubmit = async () => {
+
+                document.getElementById('sendButton').display = true
+                document.getElementById('sendButton').innerHTML = 'Loading...'
+
+                const formattedAnswers = Object.entries(answers.value).map(([id, data]) => ({
+                    id: parseInt(id),
+                    answer: data.answer,
+                    type: data.type,
+                }))
+
+                const payload = {
+                    full_name,
+                    quiz_id,
+                    chat_id,
+                    answers: formattedAnswers,
                 }
-            }
 
-            // Yuborish tasdiqlash oynasini ko'rsatish
-            function showSubmitConfirmation() {
-                showingSubmitConfirmation.value = true;
-            }
+                console.log("Submitting payload:", payload)
 
-            // Quiz ni yuborish
-            async function submitQuiz() {
                 try {
-                    isSubmitting.value = true;
-
-                    // To'g'ri javoblar sonini hisoblash
-                    score.value = 0;
-                    userAnswers.value.forEach((answer, index) => {
-                        const question = questions.value[index];
-                        if (answer === question.correctAnswer) {
-                            score.value++;
-                        }
-                    });
-
-                    // Backend ga yuborish
-                    // Bu yerda o'zingizning backend URL ingizni ko'rsating
-                    let url = '/rash/send'
-                    const response = await fetch(url, {
-                        method: 'POST',
+                    const response = await fetch("https://simply.uz/rash/send", {
+                        method: "POST",
                         headers: {
-                            'Content-Type': 'application/json',
+                            "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({
-                            answers: userAnswers.value,
-                            score: score.value,
-                            rash_id: "<?=$model->id?>",
-                            full_name: "<?=$full_name?>",
-                            chat_id: USER_ID,
-                            totalQuestions: questions.value.length
-                        }),
-                    });
-
-                    // Agar backend ga yuborish kerak bo'lmasa, quyidagi qatorni izohdan chiqaring
-                    // va yuqoridagi fetch qismini izohga oling
-                    // submitSuccess.value = true;
+                        body: JSON.stringify(payload),
+                    })
 
                     if (response.ok) {
-                        submitSuccess.value = true;
+                        console.log("Answers submitted successfully!")
+                        window.location.replace("/rash/success")
                     } else {
-                        console.log(response)
-                        submitError.value = 'Oldin ushbu testni topshirgansiz';
+                        const errorData = await response.json()
+                        console.error("Failed to submit answers:", response.status, response.statusText, errorData)
+                        alert('Oldin ushbu testni topshirgansiz')
                     }
                 } catch (error) {
-                    // Haqiqiy backend bo'lmagani uchun, test maqsadida muvaffaqiyatli deb belgilaymiz
-                    submitSuccess.value = true;
-                    // submitError.value = error.message || 'Xatolik yuz berdi';
-                } finally {
-                    isSubmitting.value = false;
-                    quizCompleted.value = true;
+                    console.error("Error submitting answers:", error)
+                    alert("Tarmoq xatosi: Javoblarni yuborib bo‘lmadi. Iltimos, internet aloqangizni tekshiring.")
                 }
             }
-
-            // Quiz ni qayta boshlash
-            function restartQuiz() {
-                currentQuestionIndex.value = 0;
-                userAnswers.value = Array(questions.value.length).fill('');
-                quizCompleted.value = false;
-                score.value = 0;
-                submitSuccess.value = false;
-                submitError.value = '';
-                showingSubmitConfirmation.value = false;
-                nextTick(() => {
-                    initMathField();
-                });
-            }
-
-            // Try to load saved answers from localStorage
-            const savedAnswers = localStorage.getItem('quiz-answers');
-            if (savedAnswers) {
-                try {
-                    const parsedAnswers = JSON.parse(savedAnswers);
-                    if (Array.isArray(parsedAnswers) && parsedAnswers.length === questions.value.length) {
-                        userAnswers.value = parsedAnswers;
-                    }
-                } catch (e) {
-                    console.error('Error loading saved answers:', e);
-                }
-            }
-
-            watch(userAnswers, (newAnswers) => {
-                console.log('Answers updated:', newAnswers);
-                localStorage.setItem('quiz-answers', JSON.stringify(newAnswers));
-            }, { deep: true });
 
             return {
                 questions,
-                currentQuestionIndex,
-                currentQuestion,
-                userAnswers,
-                quizCompleted,
-                score,
-                progress,
-                isSubmitting,
-                submitSuccess,
-                submitError,
-                showingSubmitConfirmation,
-                unansweredCount,
-                hasAnswer,
-                goToQuestion,
-                selectOption,
-                updateMathInput,
-                prevQuestion,
-                nextQuestion,
-                showSubmitConfirmation,
-                submitQuiz,
-                restartQuiz
-            };
+                answers,
+                mathLiveLoaded,
+                handleChoiceSelect,
+                handleMathInputChange,
+                handleSubmit,
+            }
         }
-    }).mount('#app');
+    }).mount("#app")
 </script>
-<script>
-    window.addEventListener("beforeunload", function (e) {
-        const message = "O'zgartirishlar saqlanmagan bo'lishi mumkin. Chiqmoqchimisiz?";
-        e.returnValue = message;
-        return message;
-    });
-</script>
-
-
-

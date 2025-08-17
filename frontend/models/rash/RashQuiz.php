@@ -13,6 +13,7 @@ namespace frontend\models\rash;
  * @property float|null $answer_4
  * @property float|null $answer_5
  * @property float|null $number
+ * @property float|null $format
  */
 class RashQuiz extends \yii\db\ActiveRecord
 {
@@ -26,8 +27,7 @@ class RashQuiz extends \yii\db\ActiveRecord
     {
         return [
             [['rash_control_id', 'type', 'answer_1', 'number'], 'required'],
-            [['answer_1', 'answer_2', 'answer_3', 'answer_4', 'answer_5'], 'string'],
-            [['number'], 'integer'],
+            [['answer_1', 'answer_2', 'answer_3', 'answer_4', 'answer_5', 'format', 'number'], 'string'],
         ];
     }
 

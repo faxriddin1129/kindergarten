@@ -71,7 +71,7 @@ class RashControlController extends AppController
         $this->layout = 'login';
         $model = RashControl::findOne($id);
         $answers = RashAnswer::find()->andWhere(['rash_control_id' => $id])->asArray()->all();
-        $questions = RashQuiz::find()->andWhere(['rash_control_id' => $id])->orderBy(['number' => SORT_ASC])->asArray()->all();
+        $questions = RashQuiz::find()->andWhere(['rash_control_id' => $id])->orderBy(['number' => SORT_ASC])->indexBy('id')->asArray()->all();
         return $this->render('rash',[
             'model' => $model,
             'answers' => $answers,
