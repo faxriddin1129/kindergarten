@@ -109,4 +109,14 @@ class FinanceController extends AppController
         return $data;
     }
 
+    public function actionCheck($start = null, $end = null)
+    {
+        if (!$start){ $start = date('Y-m-d'); }
+        if (!$end){ $end = date('Y-m-d'); }
+
+        return $this->render('check',[
+            'start' => $start,
+            'end' => $end
+        ]);
+    }
 }

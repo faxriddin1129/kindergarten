@@ -28,15 +28,23 @@ use yii\widgets\ActiveForm;
 
            <?= $form->field($model, 'room_id')->dropDownList(\yii\helpers\ArrayHelper::map(\frontend\models\Room::find()->asArray()->all(),'id','title'),['prompt' => 'Выбирать']) ?>
 
-           <div class="row">
-               <div class="col-md-6">
-                   <?= $form->field($model, 'start')->input('datetime-local') ?>
-               </div>
-               <div class="col-md-6">
-                   <?= $form->field($model, 'end')->input('datetime-local') ?>
-               </div>
-           </div>
+           <?=$form->field($model,'start')->input('datetime-local')?>
+           <?=$form->field($model,'end')->input('datetime-local')?>
+       </div>
 
+       <div class="col-md-6">
+
+           <?= $form->field($model, 'week_1')->checkbox(['label' => 'Dushanba']) ?>
+           <?= $form->field($model, 'week_2')->checkbox(['label' => 'Seshanba']) ?>
+           <?= $form->field($model, 'week_3')->checkbox(['label' => 'Chorshanba']) ?>
+           <?= $form->field($model, 'week_4')->checkbox(['label' => 'Payshanba']) ?>
+           <?= $form->field($model, 'week_5')->checkbox(['label' => 'Juma']) ?>
+           <?= $form->field($model, 'week_6')->checkbox(['label' => 'Shanba']) ?>
+           <?= $form->field($model, 'week_7')->checkbox(['label' => 'Yakshanba']) ?>
+
+       </div>
+
+       <div class="col-md-6">
            <div class="form-group">
                <?= Html::submitButton('Сохранить', ['class' => 'btn btn-sm btn-success p-2 mt-3']) ?>
            </div>

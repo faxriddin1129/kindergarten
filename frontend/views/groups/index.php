@@ -32,7 +32,6 @@ $current_teacher = $_REQUEST['teacher']??null;
     <?php if (Yii::$app->user->identity['role'] != 3): ?>
     <p>
         <?= Html::a('Guruh yaratish', ['create'], ['class' => 'btn btn-sm btn-success']) ?>
-        <button class="btn btn-sm btn-outline-info cursor-not-allowed">Faol Invoicelar <?=$activeCount?> <i class="mdi mdi-human-greeting menu-icon"></i></button>
 
         <?php if ($debtCount > 0): ?>
         <a href="/groups/debts" class="btn btn-sm btn-danger">Qarzdorlar ro'yxati <?=$debtCount?> <i class="mdi mdi-human-greeting menu-icon"></i></a>
@@ -76,13 +75,18 @@ $current_teacher = $_REQUEST['teacher']??null;
                         <div>
                             <b><?=$datum['title']?> <?=$start?> - <?=$end?> </b>
                         </div>
-                        <?php if ( $start < $now && $end > $now ): ?>
-                        <div class="d-flex gap-2">
-                            <div>Live </div>
-                            <div class="spinner-grow text-warning" role="status">
-                                <span class="sr-only"></span>
+                        <?php
+                            $todayN = date('N');
+                            $checkKey = 'week_'.$todayN;
+                            $check = $datum["$checkKey"];
+                        ?>
+                        <?php if ( $start < $now && $end > $now && $check): ?>
+                            <div class="d-flex gap-2">
+                                <div>Live </div>
+                                <div class="spinner-grow text-warning" role="status">
+                                    <span class="sr-only"></span>
+                                </div>
                             </div>
-                        </div>
                         <?php endif; ?>
 
                     </div>

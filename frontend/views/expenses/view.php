@@ -19,10 +19,17 @@ foreach ($data as $datum){
 <div class="row p-3">
     <div class="col-md-12">
         <div class="card p-4 table-responsive">
-            <div class="d-flex gap-2">
-                <a class="mb-2" href="/expenses/index?month=<?=$oldModel->month?>">#Orqaga</a>
-                <h4><?=$oldModel->month?> => <?=$oldModel->teacher->username?></h4>
-                <a class="mb-2" href="/expenses/view-create?id=<?=$oldModel->id?>">#To'lov qilish</a>
+            <div class="d-flex gap-2 w-100">
+                <div class="d-flex w-100 justify-content-between">
+                    <div class="d-flex gap-2">
+                        <a class="mb-2" href="/expenses/index?month=<?=$oldModel->month?>">#Orqaga</a>
+                        <h4><?=$oldModel->month?> => <?=$oldModel->teacher->username?></h4>
+                        <a class="mb-2" href="/expenses/view-create?id=<?=$oldModel->id?>">#To'lov qilish</a>
+                    </div>
+                    <div>
+                        <a data-confirm="Reja bekor qilinsa qilingan to`lovlar ham bekor bo`ladi!" class="mb-2 text-danger ml-5" href="/expenses/delete?id=<?=$oldModel->id?>">#Rejani Bekor qilish</a>
+                    </div>
+                </div>
             </div>
 
 

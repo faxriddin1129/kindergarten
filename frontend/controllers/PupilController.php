@@ -107,7 +107,7 @@ class PupilController extends AppController
 
         if ($group_id){
             $pup = GroupPupil::find()
-                    ->select(['group_pupil.id','group_pupil.status','pupil.first_name','pupil.last_name', 'us.phone'])
+                ->select(['group_pupil.id','group_pupil.status','pupil.first_name','pupil.last_name', 'us.phone'])
                 ->leftJoin('pupil','pupil.id=group_pupil.pupil_id')
                 ->leftJoin('public.user us','us.id=pupil.user_id')
                 ->andWhere(['group_pupil.group_id' => $group_id])

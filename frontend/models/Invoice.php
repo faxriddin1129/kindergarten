@@ -2,6 +2,7 @@
 
 namespace frontend\models;
 
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -11,12 +12,14 @@ use yii\behaviors\TimestampBehavior;
  * @property int|null $pupil_id
  * @property int|null $created_at
  * @property int|null $updated_at
+ * @property int|null $created_by
+ * @property int|null $updated_by
  * @property float|null $amount
  * @property float|null $payment_amount
  * @property int|null $status
  * @property int|null $period
  * @property int|null $group_id
- * @property int|null $payment_type
+ * @property int|null $send_sms_date
  *
  * @property Pupil $pupil
  * @property Transactions[] $transactions
@@ -29,7 +32,8 @@ class Invoice extends \yii\db\ActiveRecord
     public function behaviors()
     {
         return [
-            TimestampBehavior::class
+            TimestampBehavior::class,
+            BlameableBehavior::class,
         ];
     }
 
@@ -47,10 +51,11 @@ class Invoice extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['pupil_id', 'created_at', 'updated_at', 'status', 'period', 'group_id'], 'default', 'value' => null],
-            [['pupil_id', 'created_at', 'updated_at', 'status', 'group_id', 'payment_type'], 'integer'],
+            [['pupil_id', 'created_at', 'updated_at', 'created_by', 'updated_by', 'status', 'period', 'group_id'], 'default', 'value' => null],
+            [['pupil_id', 'created_at', 'updated_at', 'created_by', 'updated_by', 'status', 'group_id'], 'integer'],
             [['amount', 'payment_amount'], 'number'],
             [['period'], 'string'],
+            [['send_sms_date'], 'safe'],
             [['pupil_id'], 'exist', 'skipOnError' => true, 'targetClass' => Pupil::class, 'targetAttribute' => ['pupil_id' => 'id']],
             [['group_id'], 'exist', 'skipOnError' => true, 'targetClass' => Groups::class, 'targetAttribute' => ['group_id' => 'id']],
         ];

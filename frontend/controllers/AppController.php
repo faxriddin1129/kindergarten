@@ -24,7 +24,7 @@ class AppController extends Controller
                             'logout', 'index', 'create', 'update', 'pupil-search', 'create-pupil-group', 'delete-pupil-group', 'view', 'group-pupils',
                             'group-pupils-checking', 'group-pupils-payment', 'invoices', 'create-invoice', 'transfer', 'debts', 'groups', 'pupil', 'update-all',
                             'update-invoice-all', 'sms-all', 'update-invoice', 'sms-all-in', 'pupil-error', 'sms', 'check', 'create-p', 'uniq', 'view-create',
-                            'main', 'answer', 'quiz', 'quiz-delete', 'user', 'rash'
+                            'main', 'answer', 'quiz', 'quiz-delete', 'user', 'rash', 'delete'
                         ],
                         'allow' => true,
                         'roles' => ['@'],

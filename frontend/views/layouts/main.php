@@ -211,12 +211,12 @@ $user = \frontend\models\User::findOne(['id' => Yii::$app->user->id]);
                             <i class="mdi mdi-wallet menu-icon"></i>
                         </a>
                     </li>
-<!--                    <li class="nav-item">-->
-<!--                        <a class="nav-link" href="/rash-control/main">-->
-<!--                            <span class="menu-title">Mstest</span>-->
-<!--                            <i class="mdi mdi-wallet menu-icon"></i>-->
-<!--                        </a>-->
-<!--                    </li>-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/rash-control/main">
+                            <span class="menu-title">Mstest</span>
+                            <i class="mdi mdi-wallet menu-icon"></i>
+                        </a>
+                    </li>
                 </ul>
             </nav>
             <div class="main-panel">

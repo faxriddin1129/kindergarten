@@ -8,7 +8,6 @@ use yii\web\NotFoundHttpException;
 
 class ExpensesController extends AppController
 {
-
     public function actionIndex($month = null)
     {
 
@@ -24,7 +23,6 @@ class ExpensesController extends AppController
             'month' => $month,
         ]);
     }
-
 
     public function actionCreate()
     {
@@ -65,7 +63,6 @@ class ExpensesController extends AppController
         ]);
     }
 
-
     public function actionView($id)
     {
         $oldModel = $this->findModel($id);
@@ -89,7 +86,6 @@ class ExpensesController extends AppController
         ]);
     }
 
-
     protected function findModel($id)
     {
         if (($model = Expenses::findOne(['id' => $id])) !== null) {
@@ -97,5 +93,21 @@ class ExpensesController extends AppController
         }
 
         throw new NotFoundHttpException(\Yii::t('app', 'The requested page does not exist.'));
+    }
+
+    public function actionDelete($id)
+    {
+        $db = \Yii::$app->db->beginTransaction();
+        $md = Expenses::findOne($id);
+        $month = $md->month;
+        $md->delete();
+        $child = Expenses::find()->andWhere(['period' => $id])->asArray()->all();
+        foreach ($child as $value) {
+            $model = Expenses::findOne($value['id']);
+            $model->delete();
+        }
+        $db->commit();
+        \Yii::$app->getSession()->setFlash('success', \Yii::t('app', 'Delete success.'));
+        return $this->redirect(['/expenses/index?month='.$month]);
     }
 }

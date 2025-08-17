@@ -20,8 +20,13 @@ use Yii;
  * @property int|null $updated_at
  * @property int|null $status
  * @property int|null $room_id
- * @property int|null $start
- * @property int|null $end
+ * @property int|null $week_1
+ * @property int|null $week_2
+ * @property int|null $week_3
+ * @property int|null $week_4
+ * @property int|null $week_5
+ * @property int|null $week_6
+ * @property int|null $week_7
  *
  * @property User $createdBy
  * @property User $educator
@@ -53,7 +58,6 @@ class Groups extends \yii\db\ActiveRecord
             [['price', 'teacher_id', 'educator_id', 'title', 'room_id'], 'required'],
             [['status'], 'default', 'value' => self::STATUS_ACTIVE],
             [['price'], 'number'],
-            [['start', 'end'], 'safe'],
             [['description'], 'string'],
             [['teacher_id', 'educator_id', 'auto_discount', 'created_by', 'updated_by', 'created_at', 'updated_at', 'status', 'room_id'], 'default', 'value' => null],
             [['teacher_id', 'educator_id', 'auto_discount', 'created_by', 'updated_by', 'created_at', 'updated_at', 'status', 'room_id'], 'integer'],
@@ -62,6 +66,7 @@ class Groups extends \yii\db\ActiveRecord
             [['educator_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['educator_id' => 'id']],
             [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['created_by' => 'id']],
             [['updated_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['updated_by' => 'id']],
+            [['week_1', 'week_2', 'week_3', 'week_4', 'week_5', 'week_6', 'week_7', 'start', 'end'], 'safe']
         ];
     }
 

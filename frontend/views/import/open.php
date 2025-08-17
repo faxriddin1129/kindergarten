@@ -46,6 +46,21 @@
             updateField(field, event) {
                 this[field] = event.target.value;
             },
+            onSubmit() {
+                console.log("Yuborilayotgan formulalar:");
+                console.log("Formula 1:", this.latex1);
+                console.log("Formula 2:", this.latex2);
+                console.log("Formula 3:", this.latex3);
+
+                // Optional: tekshiruv
+                if (!this.latex1 || !this.latex2 || !this.latex3) {
+                    alert("Iltimos, barcha formulalarni to‘ldiring.");
+                    return;
+                }
+
+                // Formani yuborish uchun JavaScript orqali formani topib submit qilish
+                // this.$el.querySelector('form').submit();
+            }
         }
     });
 </script>
